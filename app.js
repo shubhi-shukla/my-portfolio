@@ -8,7 +8,17 @@ dotenv.config({ path : './config.env'});
 const app = express();
 app.use(express.json());
 
-require('./db/conn');
+//require('./db/conn');
+const DB = process.env.DATABASE;
+const connectDB = async () => {
+    try {
+      const conn = await mongoose.connect(process.env.DATABASE);
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+    } catch (error) {
+      console.log(error);
+      process.exit(1);
+    }
+  }
 const PORT = process.env.PORT || 8000;
 
 app.use(express.static(path.join(__dirname,'./client/build')));
@@ -50,6 +60,8 @@ app.post('/message', async (req, res) => {
     }
 })
 
-app.listen(PORT, () => {
-    console.log(`server is listening on port ${PORT}`);
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log("listening for requests");
+    })
 })
